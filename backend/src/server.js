@@ -1,11 +1,11 @@
 import express from 'express';
 const app = express()
 import path from "path";
-import ENV from './lib/env.js';
+import {ENV} from './lib/env.js';
 
 const __dirname = path.resolve();
 
-app.use('/', (req, res) => {
+app.use('/api', (req, res) => {
   return res.status(200).json({message:"api is running", success: true})
 })
 
