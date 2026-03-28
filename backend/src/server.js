@@ -6,6 +6,8 @@ import { connectDB } from './lib/db.js'
 import cors from 'cors'
 import {inngest, functions} from './lib/inngest.js'
 import {serve} from 'inngest/express'
+import { clerkMiddleware } from '@clerk/express';
+
 
 const __dirname = path.resolve();
 
@@ -13,6 +15,10 @@ const __dirname = path.resolve();
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({origin:ENV.CLIENT_URL,credentials:true}))
+
+app.use(clerkMiddleware({
+  publicRoutes:["/api/inngest"]
+}))
 
 app.use('api/inngest',serve({client:inngest, functions}))
 if (ENV.NODE_ENV === 'production') {
