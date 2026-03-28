@@ -4,6 +4,7 @@ import {ENV} from './env.js'
 
 export const inngest = new Inngest({
   id:"uma-coaching-classes",
+  signingKey:ENV.INGEST_SIGNING_KEY,  
   
 })
 
