@@ -14,10 +14,6 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({origin:ENV.CLIENT_URL,credentials:true}))
 
-app.use('/api', (req, res) => {
-  return res.status(200).json({ message: "api is running", success: true })
-})
-
 app.use('/api/inngest',serve({client:inngest, functions}))
 if (ENV.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/dist')))
