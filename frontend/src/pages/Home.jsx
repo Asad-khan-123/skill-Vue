@@ -1,8 +1,15 @@
-import { SignOutButton, useUser } from '@clerk/react';
 import { BookOpen, UserCheck, CreditCard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
-  const { user } = useUser();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleSignOut = () => {
+    logout();
+    navigate('/');
+  };
 
   const cards = [
     {
@@ -39,18 +46,19 @@ const Home = () => {
         <div className="flex items-center gap-6">
           {user && (
             <div className="full items-center gap-3 hidden md:flex">
-                <img src={user.imageUrl} alt="Profile" className="w-9 h-9 rounded-full border border-gray-200" />
+                <img src={user.profilePicture} alt="Profile" className="w-9 h-9 rounded-full border border-gray-200" />
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-800 leading-tight">{user.fullName || "Student"}</span>
-                  <span className="text-xs text-gray-500">{user.primaryEmailAddress?.emailAddress}</span>
+                  <span className="text-sm font-semibold text-gray-800 leading-tight">{user.name}</span>
+                  <span className="text-xs text-gray-500">{user.email}</span>
                 </div>
             </div>
           )}
-          <SignOutButton signOutOptions={{ redirectUrl: '/' }}>
-            <button className="text-sm font-medium px-5 py-2.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition flex items-center gap-2">
-              Sign Out
-            </button>
-          </SignOutButton>
+          <button 
+            onClick={handleSignOut}
+            className="text-sm font-medium px-5 py-2.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition flex items-center gap-2"
+          >
+            Sign Out
+          </button>
         </div>
       </header>
 

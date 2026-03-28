@@ -1,28 +1,17 @@
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '@clerk/react';
-import { useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import { useAuth } from './context/AuthContext';
 
 const App = () => {
-  const { isLoaded, isSignedIn } = useUser();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { token, loading } = useAuth();
 
-  useEffect(() => {
-    if (isLoaded) {
-      if (isSignedIn && location.pathname === '/') {
-        navigate('/home', { replace: true });
-      } else if (!isSignedIn && location.pathname !== '/') {
-        navigate('/', { replace: true });
-      }
-    }
-  }, [isLoaded, isSignedIn, location.pathname, navigate]);
+  if (loading) return null; // Or a spinner
 
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/home" element={<Home />} />
+      <Route path="/" element={!token ? <Login /> : <Navigate to="/home" />} />
+      <Route path="/home" element={token ? <Home /> : <Navigate to="/" />} />
     </Routes>
   );
 };

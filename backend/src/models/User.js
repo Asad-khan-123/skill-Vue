@@ -13,10 +13,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
-  clerkId: {
+  googleId: {
     type: String,
-    required: true,
-    unique: true
+    unique: true,
+    sparse: true
+  },
+  role: {
+    type: String,
+    enum: ['student', 'teacher', 'admin'],
+    default: 'student'
   }
 }, { timestamps: true })
 
