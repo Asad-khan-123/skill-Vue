@@ -46,11 +46,14 @@ const Login = () => {
       <div className="flex flex-col justify-between items-center md:items-start p-8 md:p-16 lg:p-24 bg-gradient-to-br from-green-50 to-gray-50 md:min-h-screen">
         <div className="w-full max-w-md mx-auto md:mx-0 text-center md:text-left">
           {/* Dummy Placeholder Logo */}
-          <div className="w-24 h-24 bg-white rounded-3xl shadow-sm mb-12 flex items-center justify-center border border-gray-100 mx-auto md:mx-0">
+          {/* <div className="w-24 h-24 bg-white rounded-3xl shadow-sm mb-12 flex items-center justify-center border border-gray-100 mx-auto md:mx-0">
             <span className="text-gray-400 font-semibold text-sm">LOGO</span>
-          </div>
-
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-blue-900 mb-6 leading-tight">
+          </div> */}
+        
+          <img src="../public/images/logo.jpeg" alt="Logo" className="w-48 h-48 bg-white rounded-3xl shadow-sm mb-12 flex items-center justify-center border border-gray-100 mx-auto md:mx-0" />
+          
+-.
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-900 to-green-900 bg-clip-text text-transparent mb-6 leading-tight">
             Welcome to <br className="hidden md:block" />
             UMA Coaching Classes
           </h1>

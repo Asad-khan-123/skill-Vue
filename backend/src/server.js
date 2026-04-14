@@ -11,7 +11,8 @@ const __dirname = path.resolve();
 //middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(cors({origin:ENV.CLIENT_URL,credentials:true}))
+app.use(cors({origin:ENV.CLIENT_URL,
+  credentials:true}))
 
 app.post('/api/auth/google', googleLogin);
 
