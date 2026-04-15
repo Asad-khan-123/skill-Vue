@@ -16,10 +16,8 @@ const role = localStorage.getItem("role") || "ADMIN";
 
 const navItems = [
   { name: "Dashboard", path: "/dashboard", icon: LayoutGridIcon },
-  ...(role === "ADMIN" 
-    ? [{ name: "Students", path: "/students", icon: UsersIcon }] 
-    : [{ name: "Attendance", path: "/attendance", icon: CalendarCheckIcon }]
-  ),
+  { name: "Students", path: "/students", icon: UsersIcon },
+  { name: "Attendance", path: "/attendance", icon: CalendarCheckIcon },
   { name: "Fees", path: "/fees", icon: WalletIcon },
   { name: "Exams", path: "/exams", icon: FileTextIcon },
   { name: "Results", path: "/results", icon: RssIcon },

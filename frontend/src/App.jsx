@@ -26,7 +26,7 @@ const App = () => {
       <Route element={token ? <Sidebar /> : <Navigate to="/" />}>
         <Route path="/dashboard" element={role === "ADMIN" ? <AdminDashboard /> : <StudentDashboard />} />
         <Route path="/students" element={role === "ADMIN" ? <Student /> : <Navigate to="/dashboard" />} />
-        <Route path="/attendance" element={role === "STUDENT" ? <Attendance /> : <Navigate to="/dashboard" />} />
+        <Route path="/attendance" element={ <Attendance /> } />
         <Route path="/fees" element={<Fees />} />
         <Route path="/exams" element={<Exams />} />
         <Route path="/results" element={<Results />} />

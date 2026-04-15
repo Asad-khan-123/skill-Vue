@@ -5,6 +5,12 @@ import { ENV } from './lib/env.js';
 import { connectDB } from './lib/db.js'
 import cors from 'cors'
 import { googleLogin } from './controllers/authController.js';
+import batchRoutes from './routes/batchRoutes.js';
+import studentRoutes from './routes/studentRoutes.js';
+import attendanceRoutes from './routes/attendanceRoutes.js';
+import feeRoutes from './routes/feeRoutes.js';
+import examRoutes from './routes/examRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const __dirname = path.resolve();
 
@@ -15,6 +21,12 @@ app.use(cors({origin:ENV.CLIENT_URL,
   credentials:true}))
 
 app.post('/api/auth/google', googleLogin);
+app.use('/api/batches', batchRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/fees', feeRoutes);
+app.use('/api/exams', examRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 
