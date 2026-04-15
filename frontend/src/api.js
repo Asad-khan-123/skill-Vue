@@ -1,8 +1,11 @@
 import axios from 'axios';
 
+const isDev = import.meta.env.MODE === 'development';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api', // Depending on ENV, but for now hardcoded 5000 as per backend setup
-  withCredentials: true, // If we ever stick cookies in
+  // In development, the backend is on port 8000. In production, it serves the frontend from same origin.
+  baseURL: import.meta.env.VITE_API_BASE_URL || (isDev ? 'http://localhost:8000/api' : '/api'), 
+  withCredentials: true,
 });
 
 // We can add auth token interceptors here if needed

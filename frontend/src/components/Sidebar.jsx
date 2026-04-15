@@ -7,10 +7,12 @@ import {
   SettingsIcon, 
   Menu, 
   X, 
-  RssIcon
+  RssIcon,
+  LogOutIcon
 } from "lucide-react";
-import { useLocation, Link, Outlet } from "react-router-dom";
+import { useLocation, Link, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 // Role-based Navigation logic
 const role = localStorage.getItem("role") || "ADMIN"; 
 
@@ -26,9 +28,16 @@ const navItems = [
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false); // Mobile menu state
   const [username] = useState("Abdul Samad");
   const pathname = location.pathname;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
 
   return (
@@ -86,6 +95,17 @@ const Sidebar = () => {
               </Link>
             ))}
           </nav>
+
+          {/* Logout Button */}
+          <div className="mt-8 pt-6 border-t border-[#2a3454]">
+             <button 
+                onClick={handleLogout}
+                className="flex items-center space-x-3 px-4 py-3 rounded-md transition-all text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full text-left"
+             >
+                <LogOutIcon size={18} />
+                <span className="text-sm font-medium">Logout</span>
+             </button>
+          </div>
         </div>
       </div>
 
