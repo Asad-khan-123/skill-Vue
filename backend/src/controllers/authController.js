@@ -10,23 +10,19 @@ export const googleLogin = async (req, res) => {
   }
 
   try {
-    // Find user by googleId or email (handles existing users who might not have googleId yet)
-    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+    // Find user by email (must exist in database)
+    let user = await User.findOne({ email });
 
     if (!user) {
-      // Create new user with default 'student' role
-      user = new User({
-        googleId,
-        email,
-        name,
-        profilePicture,
-        role: 'student',
-      });
-      await user.save();
-    } else if (!user.googleId) {
-      // Link googleId if the user exists but doesn't have one yet
+      // Email not in database - reject login
+      return res.status(401).json({ success: false, message: 'You are not an authenticated user' });
+    }
+
+    // Link googleId if the user exists but doesn't have one yet
+    if (!user.googleId) {
       user.googleId = googleId;
       if (profilePicture) user.profilePicture = profilePicture;
+      if (!user.name) user.name = name;
       await user.save();
     }
 

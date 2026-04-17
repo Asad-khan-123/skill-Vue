@@ -19,6 +19,8 @@ const Student = () => {
   // Form State
   const [formData, setFormData] = useState({
      name: "",
+     email: "",
+     age: "",
      parentPhone: "",
      enrollmentDate: new Date().toISOString().split('T')[0],
      batch: "",
@@ -118,6 +120,7 @@ const Student = () => {
            fetchStudents();
            setFormData({
                name: "",
+               email: "",
                parentPhone: "",
                enrollmentDate: new Date().toISOString().split('T')[0],
                batch: "",
@@ -276,15 +279,23 @@ const Student = () => {
                         <label className="text-sm font-medium text-gray-700">Full Name</label>
                         <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} type="text" placeholder="e.g. Mohd Asad" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                      </div>
+                     <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Email</label>
+                        <input required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} type="email" placeholder="student@example.com" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                     </div>
                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                           <label className="text-sm font-medium text-gray-700">Age</label>
+                           <input required value={formData.age} onChange={e => setFormData({...formData, age: e.target.value})} type="number" placeholder="16" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                        </div>
                         <div className="space-y-2">
                            <label className="text-sm font-medium text-gray-700">Parent Phone</label>
                            <input required value={formData.parentPhone} onChange={e => setFormData({...formData, parentPhone: e.target.value})} type="text" placeholder="+91 xxxxxxxxxx" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                         </div>
-                        <div className="space-y-2">
-                           <label className="text-sm font-medium text-gray-700">Enrollment Date</label>
-                           <input required value={formData.enrollmentDate} onChange={e => setFormData({...formData, enrollmentDate: e.target.value})} type="date" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-600" />
-                        </div>
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Enrollment Date</label>
+                        <input required value={formData.enrollmentDate} onChange={e => setFormData({...formData, enrollmentDate: e.target.value})} type="date" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-600" />
                      </div>
                      
                      <div className="space-y-2">

@@ -13,18 +13,31 @@ import {
 import { useLocation, Link, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-// Role-based Navigation logic
-const role = localStorage.getItem("role") || "ADMIN"; 
 
-const navItems = [
-  { name: "Dashboard", path: "/dashboard", icon: LayoutGridIcon },
-  { name: "Students", path: "/students", icon: UsersIcon },
-  { name: "Attendance", path: "/attendance", icon: CalendarCheckIcon },
-  { name: "Fees", path: "/fees", icon: WalletIcon },
-  { name: "Exams", path: "/exams", icon: FileTextIcon },
-  { name: "Results", path: "/results", icon: RssIcon },
-  { name: "Settings", path: "/settings", icon: SettingsIcon },
-];
+// Role-based Navigation logic
+const role = localStorage.getItem("role") || "student"; 
+
+const getNavItems = (userRole) => {
+  const allItems = [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutGridIcon },
+    { name: "Students", path: "/students", icon: UsersIcon, adminOnly: true },
+    { name: "Attendance", path: "/attendance", icon: CalendarCheckIcon },
+    { name: "Fees", path: "/fees", icon: WalletIcon },
+    { name: "Exams", path: "/exams", icon: FileTextIcon },
+    { name: "Results", path: "/results", icon: RssIcon },
+    { name: "Settings", path: "/settings", icon: SettingsIcon },
+  ];
+
+  // Filter based on role
+  if (userRole === "admin") {
+    return allItems;
+  } else {
+    // Students can't see Students page
+    return allItems.filter(item => !item.adminOnly);
+  }
+};
+
+const navItems = getNavItems(role);
 
 const Sidebar = () => {
   const location = useLocation();

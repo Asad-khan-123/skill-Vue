@@ -1,4 +1,5 @@
 import Student from '../models/Student.js';
+import { User } from '../models/User.js';
 
 export const getStudents = async (req, res) => {
   try {
@@ -16,8 +17,18 @@ export const getStudents = async (req, res) => {
 
 export const createStudent = async (req, res) => {
   try {
-    const { name, parentPhone, enrollmentDate, batch, totalCourseFee } = req.body;
+    const { name, email, age, parentPhone, enrollmentDate, batch, totalCourseFee } = req.body;
     
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    // Check if email already exists
+    const existingEmail = await Student.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ success: false, message: 'Email already in use' });
+    }
+
     // Generate robust ID STU-XXXX by finding the highest one
     const lastStudent = await Student.findOne().sort({ studentId: -1 });
     let nextNum = 1001;
@@ -27,9 +38,19 @@ export const createStudent = async (req, res) => {
     }
     const studentId = `STU-${nextNum}`;
 
+    // Create User entry first
+    const newUser = new User({
+      email,
+      name,
+      role: 'student'
+    });
+    await newUser.save();
+
     const newStudent = new Student({
       studentId,
+      email,
       name,
+      age,
       parentPhone,
       enrollmentDate,
       batch,

@@ -16,7 +16,8 @@ const App = () => {
 
   if (loading) return null; // Or a spinner
 
-  const role = localStorage.getItem("role") || "ADMIN";
+  // Get role from localStorage (set during login)
+  const role = localStorage.getItem("role") || null;
 
   return (
     <Routes>
@@ -24,9 +25,11 @@ const App = () => {
       
       {/* Protected Routes mapped inside Sidebar Layout */}
       <Route element={token ? <Sidebar /> : <Navigate to="/" />}>
-        <Route path="/dashboard" element={role === "ADMIN" ? <AdminDashboard /> : <StudentDashboard />} />
-        <Route path="/students" element={role === "ADMIN" ? <Student /> : <Navigate to="/dashboard" />} />
-        <Route path="/attendance" element={ <Attendance /> } />
+        <Route path="/dashboard" element={<>
+          {role === "admin" ? <AdminDashboard /> : role === "student" ? <StudentDashboard /> : <Navigate to="/" />}
+        </>} />
+        <Route path="/students" element={role === "admin" ? <Student /> : <Navigate to="/dashboard" />} />
+        <Route path="/attendance" element={<Attendance />} />
         <Route path="/fees" element={<Fees />} />
         <Route path="/exams" element={<Exams />} />
         <Route path="/results" element={<Results />} />
