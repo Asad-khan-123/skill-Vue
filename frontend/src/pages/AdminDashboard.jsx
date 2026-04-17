@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { UsersIcon, WalletIcon, TrendingUpIcon, AlertCircleIcon, BellIcon, CalendarIcon, ChevronRightIcon, XIcon, Loader2Icon } from "lucide-react";
+import { UsersIcon, WalletIcon, TrendingUpIcon, AlertCircleIcon, BellIcon, CalendarIcon, ChevronRightIcon, XIcon, Loader2Icon, Trash2Icon } from "lucide-react";
 import api from "../api.js";
 
 const AdminDashboard = () => {
@@ -21,6 +21,7 @@ const AdminDashboard = () => {
       baseFee: ""
    });
    const [batchSaving, setBatchSaving] = useState(false);
+   const [deletingBatchId, setDeletingBatchId] = useState(null);
 
    const fetchDashboard = async () => {
       try {
@@ -55,6 +56,24 @@ const AdminDashboard = () => {
          alert(error.response?.data?.message || "Failed to create batch");
       } finally {
          setBatchSaving(false);
+      }
+   };
+
+   const handleDeleteBatch = async (batchId, batchName) => {
+      if (window.confirm(`Are you sure you want to delete batch "${batchName}"? This will delete all students, attendance records, fees, and results associated with this batch.`)) {
+         setDeletingBatchId(batchId);
+         try {
+            const { data } = await api.delete(`/batches/${batchId}`);
+            if (data.success) {
+               alert(`Batch "${batchName}" and all related records deleted successfully`);
+               fetchDashboard(); // Refresh
+            }
+         } catch (error) {
+            console.error("Failed to delete batch:", error);
+            alert(error.response?.data?.message || "Failed to delete batch");
+         } finally {
+            setDeletingBatchId(null);
+         }
       }
    };
 
@@ -144,10 +163,20 @@ const AdminDashboard = () => {
                <div className="p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                      {batches.map((batch, index) => (
-                        <div key={index} className="border border-gray-100 p-4 rounded-xl hover:border-blue-100 hover:bg-blue-50/50 transition-colors group cursor-pointer">
-                           <div className="flex justify-between items-center mb-2">
+                        <div key={index} className="border border-gray-100 p-4 rounded-xl hover:border-blue-100 hover:bg-blue-50/50 transition-colors group cursor-pointer relative">
+                           <div className="flex justify-between items-start mb-2">
                               <h3 className="font-bold text-gray-800">{batch.name}</h3>
-                              <span className="text-xs font-bold px-2 py-1 bg-gray-100 text-gray-600 rounded-md group-hover:bg-white transition-colors">{batch.strength} Students</span>
+                              <div className="flex items-center gap-2">
+                                 <span className="text-xs font-bold px-2 py-1 bg-gray-100 text-gray-600 rounded-md group-hover:bg-white transition-colors">{batch.strength} Students</span>
+                                 <button
+                                    onClick={() => handleDeleteBatch(batch._id, batch.name)}
+                                    disabled={deletingBatchId === batch._id}
+                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                    title="Delete batch"
+                                 >
+                                    {deletingBatchId === batch._id ? <Loader2Icon size={16} className="animate-spin" /> : <Trash2Icon size={16} />}
+                                 </button>
+                              </div>
                            </div>
                            <div className="flex items-center text-sm text-gray-500 space-x-4">
                               <span>Teacher: <span className="font-medium text-gray-700">{batch.classTeacher}</span></span>

@@ -54,7 +54,7 @@ export const getStudentFeeLedger = async (req, res) => {
   try {
     const { id } = req.params;
     const payments = await FeePayment.find({ student: id }).sort({ datePaid: -1 });
-    const student = await Student.findById(id).select('name totalCourseFee paidAmount totalDues');
+    const student = await Student.findById(id).populate('batch', 'name classTeacher').select('name email studentId totalCourseFee paidAmount totalDues batch enrollmentDate');
     
     res.status(200).json({ 
        success: true, 

@@ -1,21 +1,21 @@
-import { 
-  LayoutGridIcon, 
-  UsersIcon, 
-  CalendarCheckIcon, 
-  FileTextIcon, 
-  WalletIcon, 
-  SettingsIcon, 
-  Menu, 
-  X, 
+import {
+  LayoutGridIcon,
+  UsersIcon,
+  CalendarCheckIcon,
+  FileTextIcon,
+  WalletIcon,
+  SettingsIcon,
+  Menu,
+  X,
   RssIcon,
-  LogOutIcon
+  LogOutIcon,
 } from "lucide-react";
 import { useLocation, Link, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 // Role-based Navigation logic
-const role = localStorage.getItem("role") || "student"; 
+const role = localStorage.getItem("role") || "student";
 
 const getNavItems = (userRole) => {
   const allItems = [
@@ -33,7 +33,7 @@ const getNavItems = (userRole) => {
     return allItems;
   } else {
     // Students can't see Students page
-    return allItems.filter(item => !item.adminOnly);
+    return allItems.filter((item) => !item.adminOnly);
   }
 };
 
@@ -52,10 +52,8 @@ const Sidebar = () => {
     navigate("/");
   };
 
-
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
-      
       {/* Mobile Header (Only visible on small screens) */}
       <div className="md:hidden bg-[#1e2640] text-white p-4 flex justify-between items-center">
         <h1 className="font-bold text-lg">UMA CLASSES</h1>
@@ -65,32 +63,41 @@ const Sidebar = () => {
       </div>
 
       {/* Sidebar Overlay for Mobile */}
-      <div className={`
+      <div
+        className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-[#1e2640] text-gray-300 transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"} 
         md:relative md:translate-x-0 md:flex md:flex-col
-      `}>
-        
+      `}
+      >
         {/* Sidebar Header/Logo */}
         <div className="p-6">
           <div className="flex items-center space-x-2 mb-8">
-             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">U</div>
-             <span className="text-white font-semibold text-lg">UMA CLASSES</span>
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
+              U
+            </div>
+            <span className="text-white font-semibold text-lg">
+              UMA CLASSES
+            </span>
           </div>
 
           {/* User Profile Section (Like Image) */}
           <div className="bg-[#2a3454] p-3 rounded-lg mb-8 flex items-center space-x-3">
-             <div className="w-10 h-10 bg-gray-500 rounded-md flex items-center justify-center text-white">
-                <UsersIcon size={20} />
-             </div>
-             <div>
-                <p className="text-white text-sm font-medium">{username}</p>
-                <p className="text-xs text-gray-400 capitalize">{role.toLowerCase()}</p>
-             </div>
+            <div className="w-10 h-10 bg-gray-500 rounded-md flex items-center justify-center text-white">
+              <UsersIcon size={20} />
+            </div>
+            <div>
+              <p className="text-white text-sm font-medium">{username}</p>
+              <p className="text-xs text-gray-400 capitalize">
+                {role.toLowerCase()}
+              </p>
+            </div>
           </div>
 
           {/* Navigation Links */}
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Navigation</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">
+            Navigation
+          </p>
           <nav className="space-y-1">
             {navItems.map((item) => (
               <Link
@@ -111,13 +118,13 @@ const Sidebar = () => {
 
           {/* Logout Button */}
           <div className="mt-8 pt-6 border-t border-[#2a3454]">
-             <button 
-                onClick={handleLogout}
-                className="flex items-center space-x-3 px-4 py-3 rounded-md transition-all text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full text-left"
-             >
-                <LogOutIcon size={18} />
-                <span className="text-sm font-medium">Logout</span>
-             </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-3 px-4 py-3 rounded-md transition-all text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full text-left"
+            >
+              <LogOutIcon size={18} />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
           </div>
         </div>
       </div>
@@ -128,9 +135,8 @@ const Sidebar = () => {
           <Outlet />
         </div>
       </div>
-
     </div>
   );
 };
 
-export default Sidebar;     
+export default Sidebar;

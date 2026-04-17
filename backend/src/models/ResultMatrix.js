@@ -14,6 +14,10 @@ const resultMatrixSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  chapter: {
+    type: String,
+    required: true
+  },
   maxMarks: {
     type: Number,
     required: true,
@@ -21,7 +25,11 @@ const resultMatrixSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    default: Date.now
+    required: true
+  },
+  timing: {
+    type: String,
+    required: true
   },
   scores: [{
     student: {
