@@ -1,12 +1,340 @@
 import { useState, useEffect } from "react";
-import { PlusIcon, SaveIcon, Loader2Icon, XIcon } from "lucide-react";
+import {
+  PlusIcon,
+  SaveIcon,
+  Loader2Icon,
+  XIcon,
+  TrophyIcon,
+  BookOpenIcon,
+  BarChart2Icon,
+  CheckCircleIcon,
+  AlertCircleIcon,
+  CalendarIcon,
+  ClockIcon,
+} from "lucide-react";
 import api from "../api.js";
+import { getUserIdFromStorage } from "../utils/tokenUtils.js";
 
-const Results = () => {
+// ─────────────────────────────────────────────
+// Shared helper: grade from percentage
+// ─────────────────────────────────────────────
+const getGrade = (percentage) => {
+  if (percentage === null || percentage === undefined) return "-";
+  if (percentage >= 90) return "A+";
+  if (percentage >= 80) return "A";
+  if (percentage >= 70) return "B+";
+  if (percentage >= 60) return "B";
+  if (percentage >= 50) return "C";
+  if (percentage >= 40) return "D";
+  return "F";
+};
+
+const gradeColor = (grade) => {
+  const map = {
+    "A+": "bg-emerald-100 text-emerald-700",
+    A: "bg-green-100 text-green-700",
+    "B+": "bg-teal-100 text-teal-700",
+    B: "bg-blue-100 text-blue-700",
+    C: "bg-yellow-100 text-yellow-700",
+    D: "bg-orange-100 text-orange-700",
+    F: "bg-red-100 text-red-700",
+    "-": "bg-gray-100 text-gray-500",
+  };
+  return map[grade] || "bg-gray-100 text-gray-500";
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+// ─────────────────────────────────────────────
+// STUDENT VIEW
+// ─────────────────────────────────────────────
+const StudentResultsView = () => {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [studentId, setStudentId] = useState(null);
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        setLoading(true);
+        const userId = getUserIdFromStorage();
+        if (!userId) {
+          setError("User session not found. Please login again.");
+          return;
+        }
+
+        // Step 1: get the student record to find student._id
+        const studentRes = await api.get(`/students/user/${userId}`);
+        if (!studentRes.data.success) {
+          setError("Could not load your student profile.");
+          return;
+        }
+        const sid = studentRes.data.student._id;
+        setStudentId(sid);
+
+        // Step 2: fetch all exam results for this student
+        const { data } = await api.get(`/exams/student-results?studentId=${sid}`);
+        if (data.success) {
+          setResults(data.results);
+        } else {
+          setError(data.message || "Failed to load results.");
+        }
+      } catch (err) {
+        setError(
+          err.response?.data?.message || "Failed to load results. Please try again."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader2Icon size={40} className="animate-spin mx-auto mb-3 text-blue-600" />
+          <p className="text-gray-500 text-sm">Loading your results…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center bg-red-50 p-8 rounded-2xl max-w-sm">
+          <AlertCircleIcon size={40} className="mx-auto mb-3 text-red-500" />
+          <p className="text-red-700 font-medium">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Stats ──────────────────────────────────
+  const totalExams = results.length;
+  const withMarks = results.filter((r) => r.marksObtained !== null);
+  const avgPercent =
+    withMarks.length > 0
+      ? Math.round(
+          withMarks.reduce((s, r) => s + r.percentage, 0) / withMarks.length
+        )
+      : null;
+  const bestPercent =
+    withMarks.length > 0
+      ? Math.max(...withMarks.map((r) => r.percentage))
+      : null;
+  const passed = withMarks.filter((r) => r.percentage >= 40).length;
+
+  const statCards = [
+    {
+      label: "Total Exams",
+      value: totalExams,
+      icon: BookOpenIcon,
+      color: "bg-blue-50 text-blue-600",
+      border: "border-blue-100",
+    },
+    {
+      label: "Average Score",
+      value: avgPercent !== null ? `${avgPercent}%` : "N/A",
+      icon: BarChart2Icon,
+      color: "bg-purple-50 text-purple-600",
+      border: "border-purple-100",
+    },
+    {
+      label: "Best Score",
+      value: bestPercent !== null ? `${bestPercent}%` : "N/A",
+      icon: TrophyIcon,
+      color: "bg-amber-50 text-amber-600",
+      border: "border-amber-100",
+    },
+    {
+      label: "Exams Passed",
+      value: `${passed} / ${withMarks.length}`,
+      icon: CheckCircleIcon,
+      color: "bg-emerald-50 text-emerald-600",
+      border: "border-emerald-100",
+    },
+  ];
+
+  return (
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">My Exam Results</h1>
+        <p className="text-gray-500 mt-1">
+          View all your exam marks and performance overview.
+        </p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {statCards.map((card) => (
+          <div
+            key={card.label}
+            className={`bg-white border ${card.border} rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow`}
+          >
+            <div className={`w-10 h-10 rounded-xl ${card.color} flex items-center justify-center mb-3`}>
+              <card.icon size={20} />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+            <p className="text-xs text-gray-500 mt-1 font-medium">{card.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Results Table */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+          <h2 className="text-lg font-bold text-gray-800">Exam Results</h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {totalExams === 0
+              ? "No results available yet."
+              : `${totalExams} exam${totalExams > 1 ? "s" : ""} recorded`}
+          </p>
+        </div>
+
+        {totalExams === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+              <BookOpenIcon size={32} className="text-blue-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              No Results Yet
+            </h3>
+            <p className="text-gray-400 text-sm max-w-xs">
+              Your exam results will appear here once your teacher enters your
+              marks.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="bg-gray-50/70 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
+                  <th className="px-6 py-4 font-semibold w-10 text-center">#</th>
+                  <th className="px-6 py-4 font-semibold min-w-[180px]">Exam</th>
+                  <th className="px-6 py-4 font-semibold">Subject</th>
+                  <th className="px-6 py-4 font-semibold hidden md:table-cell">Chapter</th>
+                  <th className="px-6 py-4 font-semibold hidden lg:table-cell">Date</th>
+                  <th className="px-6 py-4 font-semibold text-center">Max</th>
+                  <th className="px-6 py-4 font-semibold text-center">Obtained</th>
+                  <th className="px-6 py-4 font-semibold text-center">%</th>
+                  <th className="px-6 py-4 font-semibold text-center">Grade</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {results.map((result, i) => {
+                  const grade = getGrade(result.percentage);
+                  const isPending = result.marksObtained === null;
+                  return (
+                    <tr
+                      key={result._id}
+                      className="hover:bg-gray-50/60 transition-colors"
+                    >
+                      <td className="px-6 py-4 text-center text-gray-400 font-medium">
+                        {i + 1}
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-semibold text-gray-800">
+                          {result.examTitle}
+                        </p>
+                        <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                          <ClockIcon size={11} /> {result.timing || "N/A"}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 font-medium">
+                        {result.subject}
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 hidden md:table-cell">
+                        {result.chapter}
+                      </td>
+                      <td className="px-6 py-4 hidden lg:table-cell">
+                        <div className="flex items-center gap-1.5 text-gray-500">
+                          <CalendarIcon size={13} className="text-blue-400" />
+                          {formatDate(result.date)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center font-semibold text-gray-700">
+                        {result.maxMarks}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        {isPending ? (
+                          <span className="text-gray-400 text-xs italic">Pending</span>
+                        ) : (
+                          <span className="font-bold text-gray-900 text-base">
+                            {result.marksObtained}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        {isPending ? (
+                          <span className="text-gray-400">—</span>
+                        ) : (
+                          <div className="flex items-center justify-center">
+                            <div className="relative w-12 h-12">
+                              <svg className="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
+                                <circle
+                                  cx="18" cy="18" r="14"
+                                  fill="none" stroke="#e5e7eb" strokeWidth="3.5"
+                                />
+                                <circle
+                                  cx="18" cy="18" r="14"
+                                  fill="none"
+                                  stroke={
+                                    result.percentage >= 60
+                                      ? "#10b981"
+                                      : result.percentage >= 40
+                                      ? "#f59e0b"
+                                      : "#ef4444"
+                                  }
+                                  strokeWidth="3.5"
+                                  strokeDasharray={`${(result.percentage / 100) * 87.96} 87.96`}
+                                  strokeLinecap="round"
+                                />
+                              </svg>
+                              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700">
+                                {result.percentage}%
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span
+                          className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${gradeColor(grade)}`}
+                        >
+                          {grade}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────
+// ADMIN VIEW (existing marks-entry UI)
+// ─────────────────────────────────────────────
+const AdminResultsView = () => {
   const [batches, setBatches] = useState([]);
   const [activeBatch, setActiveBatch] = useState("");
-
-  // Student view state
   const [students, setStudents] = useState([]);
   const [exams, setExams] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -47,50 +375,6 @@ const Results = () => {
     fetchStudentsAndExams();
   }, [activeBatch]);
 
-  const handleMarksChange = (studentId, value) => {
-    setMatrix((prev) => ({
-      ...prev,
-      scores: prev.scores.map((s) =>
-        s.student._id === studentId ? { ...s, marksObtained: value } : s,
-      ),
-    }));
-  };
-
-  const saveMarks = async () => {
-    setSaving(true);
-    try {
-      const payload = {
-        ...matrix,
-        // Map student object back to just ID for payload
-        scores: matrix.scores.map((s) => ({
-          student: s.student._id,
-          marksObtained: s.marksObtained,
-        })),
-      };
-      const { data } = await api.post("/exams/marks", payload);
-      if (data.success) {
-        alert("Marks saved successfully!");
-      }
-    } catch (err) {
-      console.error("Failed to save marks", err);
-      alert("Could not save marks to database.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const getGrade = (marks, max) => {
-    if (marks === "" || marks === undefined) return "-";
-    const percent = (parseFloat(marks) / max) * 100;
-    if (percent >= 90) return "A+";
-    if (percent >= 80) return "A";
-    if (percent >= 70) return "B+";
-    if (percent >= 60) return "B";
-    if (percent >= 50) return "C";
-    if (percent >= 40) return "D";
-    return "F";
-  };
-
   const handleAddMarks = (student) => {
     setSelectedStudent(student);
     setSelectedExam("");
@@ -104,7 +388,6 @@ const Results = () => {
       alert("Please select exam and enter marks");
       return;
     }
-
     setSubmittingMarks(true);
     try {
       const { data } = await api.post("/exams/student-marks", {
@@ -116,7 +399,6 @@ const Results = () => {
         alert("Marks added successfully!");
         setMarksModalOpen(false);
         setSelectedStudent(null);
-        // Refresh exams list
         const examsRes = await api.get(`/exams?batch=${activeBatch}`);
         if (examsRes.data.success) setExams(examsRes.data.exams);
       }
@@ -134,13 +416,13 @@ const Results = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Exam Results</h1>
           <p className="text-gray-500 mt-1">
-            Create exams and enter student marks batch-wise.
+            Select a batch and enter student marks.
           </p>
         </div>
       </div>
 
-      {/* Student View - List of students with Add Marks button */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Batch Filter */}
         <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50/50">
           <div className="space-y-1.5 w-full md:w-64">
             <label className="text-xs font-semibold text-gray-500 uppercase">
@@ -160,6 +442,7 @@ const Results = () => {
           </div>
         </div>
 
+        {/* Students Table */}
         <div className="overflow-x-auto min-h-[400px]">
           {students.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
@@ -267,7 +550,7 @@ const Results = () => {
                   <option value="">Choose a test</option>
                   {exams.map((exam) => (
                     <option key={exam._id} value={exam._id}>
-                      {exam.examTitle} - {exam.subject} (Max: {exam.maxMarks})
+                      {exam.examTitle} — {exam.subject} (Max: {exam.maxMarks})
                     </option>
                   ))}
                 </select>
@@ -283,9 +566,7 @@ const Results = () => {
                   <input
                     type="number"
                     min="0"
-                    max={
-                      exams.find((e) => e._id === selectedExam)?.maxMarks || 100
-                    }
+                    max={exams.find((e) => e._id === selectedExam)?.maxMarks || 100}
                     value={marksInput}
                     onChange={(e) => setMarksInput(e.target.value)}
                     placeholder="Enter marks"
@@ -323,6 +604,14 @@ const Results = () => {
       )}
     </div>
   );
+};
+
+// ─────────────────────────────────────────────
+// ROOT COMPONENT — role router
+// ─────────────────────────────────────────────
+const Results = () => {
+  const role = localStorage.getItem("role");
+  return role === "admin" ? <AdminResultsView /> : <StudentResultsView />;
 };
 
 export default Results;

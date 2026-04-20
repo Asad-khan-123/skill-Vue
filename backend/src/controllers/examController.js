@@ -137,3 +137,48 @@ export const getBatchStudents = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
+
+// GET /api/exams/student-results?studentId=<Student _id>
+export const getStudentResults = async (req, res) => {
+  try {
+    const { studentId } = req.query;
+
+    if (!studentId) {
+      return res.status(400).json({ success: false, message: 'studentId query param is required' });
+    }
+
+    // Find all exams where this student has a score entry
+    const exams = await ResultMatrix.find({ 'scores.student': studentId })
+      .populate('batch', 'name classTeacher')
+      .sort({ date: -1 });
+
+    // Shape the response: one object per exam with student's marks embedded at top level
+    const results = exams.map((exam) => {
+      const scoreEntry = exam.scores.find(
+        (s) => s.student.toString() === studentId
+      );
+      const marksObtained = scoreEntry ? scoreEntry.marksObtained : null;
+      const percentage =
+        marksObtained !== null && exam.maxMarks > 0
+          ? Math.round((marksObtained / exam.maxMarks) * 100)
+          : null;
+
+      return {
+        _id: exam._id,
+        examTitle: exam.examTitle,
+        subject: exam.subject,
+        chapter: exam.chapter,
+        date: exam.date,
+        timing: exam.timing,
+        maxMarks: exam.maxMarks,
+        marksObtained,
+        percentage,
+        batch: exam.batch,
+      };
+    });
+
+    res.status(200).json({ success: true, results });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};

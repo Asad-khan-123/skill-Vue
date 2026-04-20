@@ -25,6 +25,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(newUser));
     localStorage.setItem("role", newUser.role);
+    // Store userId for accessing student-specific data (backend uses 'id', schema uses '_id')
+    const userId = newUser._id || newUser.id;
+    if (userId) {
+      localStorage.setItem("userId", userId);
+    }
   };
 
   const logout = () => {
@@ -33,6 +38,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("role");
+    localStorage.removeItem("userId");
   };
 
   return (
